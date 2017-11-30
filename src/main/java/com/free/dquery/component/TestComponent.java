@@ -5,6 +5,7 @@ import com.free.dquery.dao.ITestDao;
 import com.free.dquery.entity.RoleSource;
 import com.free.dquery.entity.RoleSourceDto;
 import com.free.dquery.util.PageInfo;
+import com.free.dquery.util.PageResult;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,8 @@ public class TestComponent implements CommandLineRunner {
 //        RoleSource roleSource = testDao.findInfoJoin(dto);
 //        System.out.println("结果===" + JSON.toJSONString(roleSource));
 //        System.out.println("结果==="+ JSON.toJSONString(testDao.findIntegerList(dto)));
-        System.out.println("结果==="+ JSON.toJSONString(testDao.findPage(dto,pageInfo)));
+        PageResult<RoleSource> pageResult = testDao.findPage(dto,pageInfo);
+        System.out.println("结果==="+ JSON.toJSONString(pageResult));
 
 
 

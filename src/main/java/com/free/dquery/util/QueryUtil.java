@@ -131,6 +131,7 @@ public class QueryUtil {
         return list;
     }
 
+
     /**
      * 查询sql 返回行数
      *
@@ -139,26 +140,17 @@ public class QueryUtil {
      * @param sessionFactory
      * @return
      */
-    public static String queryCountSize(String sql, List<Object> param, SessionFactory sessionFactory) {
-        Session session = sessionFactory.openSession();
-        String size = queryCountSize(sql, param, session);
-        session.close();
-        return size;
-    }
+    public static Long queryCountSize(String sql, List<Object> param, SessionFactory sessionFactory) {
 
-    /**
-     * 查询sql 返回行数
-     *
-     * @param sql
-     * @param param
-     * @param session
-     * @return
-     */
-    public static String queryCountSize(String sql, List<Object> param, Session session) {
-        sql = "select count(1) as size from (" + sql + ") as t";
-        SQLQuery sqlQuery = setSqlAndParam(sql, param, session);
+        String sqlCount = sql.replaceFirst(sql.substring(sql.indexOf("SELECT"), sql.indexOf("FROM")), "SELECT 1 ");
+
+        sqlCount = "select count(1) as size from (" + sqlCount + ") as t";
+
+        Session session = sessionFactory.openSession();
+        SQLQuery sqlQuery = setQueryAndParam(sqlCount, param, session);
         List<Map<String, Object>> list = sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
-        return list.get(0).get("size").toString();
+        session.close();
+        return Long.parseLong(list.get(0).get("size").toString());
     }
 
 
@@ -222,13 +214,13 @@ public class QueryUtil {
         for (Object o : param) {
             if (o instanceof QueryParam) {
                 queryParam = (QueryParam) o;
-                if (sql.contains(queryParam.getKey())){
+                if (sql.contains(queryParam.getKey())) {
                     sqlQuery.setParameter(queryParam.getKey(), queryParam.getValue());
                 }
             }
             if (o instanceof QueryParamList) {
                 queryParamList = (QueryParamList) o;
-                if (sql.contains(queryParamList.getKey())){
+                if (sql.contains(queryParamList.getKey())) {
                     sqlQuery.setParameterList(queryParamList.getKey(), queryParamList.getValue());
                 }
             }

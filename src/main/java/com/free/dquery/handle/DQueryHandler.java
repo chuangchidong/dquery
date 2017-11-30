@@ -83,7 +83,9 @@ public class DQueryHandler {
             return QueryUtil.queryForList(sql, queryParameters, null, null, sessionFactory);
         } else if (returnType == PageResult.class) {
             // 分页
-            return QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
+            List list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
+            Long total = QueryUtil.queryCountSize(sql,queryParameters,sessionFactory);
+            return new PageResult(pageInfo.getPage(),pageInfo.getSize(),total,list);
         } else {
             // 对象javabean
             return QueryUtil.queryForObject(sql, queryParameters, returnType, sessionFactory);
@@ -130,9 +132,8 @@ public class DQueryHandler {
                     System.out.println("形参定义的" + i + " param ==" + JSON.toJSONString(parameterAnnotations[i]) + " 实际值" + args[i]);
 
                     map.put(param.value(), args[i]);
-                    // 写死了,判断分页情况
-                    Class<?> clazz = Class.forName(args[i].getClass().getTypeName());
-                    if (clazz.newInstance() instanceof PageInfo) {
+
+                    if (args[i] instanceof PageInfo) {
                         pageInfo = (PageInfo) args[i];
                     }
                 }
@@ -144,7 +145,8 @@ public class DQueryHandler {
 
     private String getSql(Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
         StringBuilder sb = new StringBuilder();
-        String sqlHead = dQuery.sqlHead();
+        String sqlHead = dQuery.sqlHead().replace("select","SELECT").replace("from","FROM");;
+
         if (StringUtils.isBlank(sqlHead)) {
             throw new DQueryException("哦豁,SQL头部为空,查毛线呢,(提示:神说,遇到新的注解,先看看注释)");
         }

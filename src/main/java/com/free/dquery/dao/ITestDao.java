@@ -1,6 +1,8 @@
 package com.free.dquery.dao;
 
 import com.free.dquery.annotation.DQuery;
+import com.free.dquery.annotation.DynamicSql;
+import com.free.dquery.denum.DynamicSqlJudgmentType;
 import com.free.dquery.entity.RoleSource;
 import com.free.dquery.entity.RoleSourceDto;
 import com.free.dquery.entity.Test;
@@ -16,11 +18,16 @@ import java.util.List;
  * @date 2017/11/28
  */
 @Repository
-public interface ITestDao extends JpaRepository<Test,Long> {
+public interface ITestDao extends JpaRepository<Test, Long> {
 
-        @DQuery(sqlHead = "select b.role_id roleId,c.name roleName,a.name resourceName from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId")
-        RoleSource findInfoJoin(@Param("dto") RoleSourceDto dto);
+    @DQuery(sqlHead = "select b.role_id roleId,c.name roleName,a.name resourceName from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId",
+            dynamicSql = {
+                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgmentField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
+                    @DynamicSql(sql = " and a.name=:dto.roleName", judgmentField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
+            }
+    )
+    RoleSource findInfoJoin(@Param("dto") RoleSourceDto dto);
 
-        @DQuery(sqlHead = "select b.role_id roleId from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId")
-        Long findIntegerList(@Param("dto") RoleSourceDto dto);
+    @DQuery(sqlHead = "select b.role_id roleId from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId")
+    Long findIntegerList(@Param("dto") RoleSourceDto dto);
 }

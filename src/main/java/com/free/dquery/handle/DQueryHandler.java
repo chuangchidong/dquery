@@ -2,6 +2,8 @@ package com.free.dquery.handle;
 
 import com.alibaba.fastjson.JSON;
 import com.free.dquery.annotation.DQuery;
+import com.free.dquery.annotation.DynamicSql;
+import com.free.dquery.denum.DynamicSqlJudgmentType;
 import com.free.dquery.exception.DQueryException;
 import com.free.dquery.queryparam.QueryParam;
 import com.free.dquery.queryparam.QueryParamList;
@@ -13,9 +15,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.repository.query.Param;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -63,19 +64,11 @@ public class DQueryHandler {
         String sql = getSql(methodParameters, queryParameters);
         System.out.println("queryParameters===" + JSON.toJSONString(queryParameters));
 
-
-        // 查询结果
-//        if (returnType.isArray() || Collection.class.isAssignableFrom(returnType)) {
-//            return query(queryParameters, sql, true,returnType);
-//        } else {
-//            return query(queryParameters, sql, false, returnType);
-//        }
         return query(queryParameters, sql, returnType);
 
     }
 
     /**
-     *
      * @param queryParameters
      * @param sql
      * @param returnType
@@ -88,7 +81,7 @@ public class DQueryHandler {
         if (returnType.isArray() || Collection.class.isAssignableFrom(returnType)) {
             // 列表
             return QueryUtil.queryForList(sql, queryParameters, null, null, sessionFactory);
-        } else if (returnType == PageResult.class){
+        } else if (returnType == PageResult.class) {
             // 分页
             return QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
         } else {
@@ -157,21 +150,71 @@ public class DQueryHandler {
         }
         sb.append(sqlHead);
 
+        // 动态添加
+        DynamicSql[] dynamicSqls = dQuery.dynamicSql();
+        for (DynamicSql dynamicSql : dynamicSqls) {
+            String isAddSql = dynamicSql.sql();
+            System.out.println("动态参数1" + isAddSql);
+            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgmentField())) {
+                continue;
+            }
+            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgmentField(), dynamicSql.type(), methodParameters, queryParameters);
+            if (checkAndPackDynamicSql) {
+                sb.append(isAddSql);
+            }
+        }
+
         //加上SQL 尾部
         sb.append(dQuery.sqlTail());
 
         return sb.toString();
     }
 
+    /**
+     * 检查并封装  动态sql
+     *
+     * @param judgmentField    检查字段
+     * @param type             判断类型
+     * @param methodParameters 所有参数
+     * @param queryParameters  查询参数
+     * @return
+     */
+    private boolean checkAndPackDynamicSql(String judgmentField, DynamicSqlJudgmentType type, Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
+        boolean check = false;
+        Object value = null;
+        if (!CollectionUtils.isEmpty(queryParameters)) {
+            for (Object object : queryParameters) {
+                if (object instanceof QueryParam) {
+                    if (((QueryParam) object).getKey().equals(judgmentField)) {
+                        value = ((QueryParam) object).getValue();
+                    }
+                } else if (object instanceof QueryParamList) {
+                    if (((QueryParam) object).getKey().equals(judgmentField)) {
+                        value = ((QueryParam) object).getValue();
+                    }
+                }
+            }
+
+        }
+
+        switch (type) {
+            case NOTNULL:
+                if (value != null) {
+                    check = true;
+                }
+                break;
+            case NOTEMPTY:
+                if (value != null && !StringUtils.isEmpty(value.toString())) {
+                    check = true;
+                }
+                break;
+        }
+        return check;
+    }
+
     private List queryParameters(Map<String, Object> methodParameters) throws IllegalAccessException {
         List parameters = new ArrayList<>();
         for (Map.Entry<String, Object> entry : methodParameters.entrySet()) {
-            //Map.entry<Integer,String> 映射项（键-值对）  有几个方法：用上面的名字entry
-            //entry.getKey() ;entry.getValue(); entry.setValue();
-            //map.entrySet()  返回此映射中包含的映射关系的 Set视图。
-//            System.out.println("key= " + entry.getKey() + " and value= "
-//                    + entry.getValue());
-
 
             if (entry.getValue() instanceof Number) {
                 parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
@@ -179,23 +222,23 @@ public class DQueryHandler {
                 parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
             } else {
                 Class<?> clazz = entry.getValue().getClass();
-                System.out.println("clazz name "+ clazz.getName());
+                System.out.println("clazz name " + clazz.getName());
                 Field[] fields = clazz.getDeclaredFields();
                 if (fields != null && fields.length > 0) {
                     for (Field field : fields) {
-                        System.out.println("===="+field.getName());
+                        System.out.println("====" + field.getName());
                         String key = entry.getKey().concat(".").concat(field.getName());
                         field.setAccessible(true);
                         Object target = field.get(entry.getValue());
-                        System.out.println("key=="+key);
-                        System.out.println("target=="+JSON.toJSONString(target));
-                        System.out.println("entry.getValue()=="+JSON.toJSONString(entry.getValue()));
+                        System.out.println("key==" + key);
+                        System.out.println("target==" + JSON.toJSONString(target));
+                        System.out.println("entry.getValue()==" + JSON.toJSONString(entry.getValue()));
                         if (null == target || StringUtils.isBlank(target.toString())) {
                             continue;
                         }
                         if (target.getClass().isArray() || Collection.class.isAssignableFrom(target.getClass())) {
-                            parameters.add(new QueryParamList(key,((List) target).toArray()));
-                        }else {
+                            parameters.add(new QueryParamList(key, ((List) target).toArray()));
+                        } else {
                             parameters.add(new QueryParam(key, target));
                         }
                     }

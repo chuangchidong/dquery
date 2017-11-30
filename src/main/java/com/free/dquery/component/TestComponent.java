@@ -24,9 +24,11 @@ public class TestComponent implements CommandLineRunner {
     public void run(String... strings) throws Exception {
         RoleSourceDto dto = new RoleSourceDto();
         dto.setRoleId(1);
+        dto.setResourceName("系统管理");
+//        dto.setRoleName("系统管理");
 
         RoleSource roleSource = testDao.findInfoJoin(dto);
-        System.out.println("结果==="+ JSON.toJSONString(roleSource));
+        System.out.println("结果===" + JSON.toJSONString(roleSource));
 //        System.out.println("结果==="+ JSON.toJSONString(testDao.findIntegerList(dto)));
     }
 }

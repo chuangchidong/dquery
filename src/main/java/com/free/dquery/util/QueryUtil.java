@@ -222,11 +222,15 @@ public class QueryUtil {
         for (Object o : param) {
             if (o instanceof QueryParam) {
                 queryParam = (QueryParam) o;
-                sqlQuery.setParameter(queryParam.getKey(), queryParam.getValue());
+                if (sql.contains(queryParam.getKey())){
+                    sqlQuery.setParameter(queryParam.getKey(), queryParam.getValue());
+                }
             }
             if (o instanceof QueryParamList) {
                 queryParamList = (QueryParamList) o;
-                sqlQuery.setParameterList(queryParamList.getKey(), queryParamList.getValue());
+                if (sql.contains(queryParamList.getKey())){
+                    sqlQuery.setParameterList(queryParamList.getKey(), queryParamList.getValue());
+                }
             }
         }
         return sqlQuery;

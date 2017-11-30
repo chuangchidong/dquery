@@ -85,13 +85,5 @@ public class MapUtil {
         }
         field.set(t, map.get(field.getName()));
     }
-
-    public static void main(String[] args) {
-        String sqlHead = "select b.role_id roleId,c.name roleName,a.name resourceName from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1";
-        String sqlCount = "select 1 ";
-
-        String count = sqlHead.replaceFirst(sqlHead.substring(sqlHead.indexOf("select"), sqlHead.indexOf("from")), sqlCount);
-        System.out.println(count);
-
-    }
+    
 }

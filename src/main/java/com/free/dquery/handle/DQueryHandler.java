@@ -56,13 +56,10 @@ public class DQueryHandler {
         // 获取返回值中
         Type genericReturnType = method.getGenericReturnType();
 
-        System.out.println("methodParameters===" + JSON.toJSONString(methodParameters));
-
         // 获取SQL
         List queryParameters = this.queryParameters(methodParameters);
 
         String sql = getSql(methodParameters, queryParameters);
-        System.out.println("queryParameters===" + JSON.toJSONString(queryParameters));
 
         return query(queryParameters, sql, returnType);
 
@@ -122,14 +119,11 @@ public class DQueryHandler {
         if (args.length != parameterAnnotations.length) {
             throw new DQueryException("形参定义的@param 数量,和实参数量不一致");
         }
-        System.out.println("实参定义的==" + JSON.toJSONString(args));
-        System.out.println("形参定义的==" + JSON.toJSONString(parameterAnnotations));
+
         for (int i = 0; i < parameterAnnotations.length; i++) {
-            System.out.println("形参定义的" + i + "==" + JSON.toJSONString(parameterAnnotations[i]));
             for (Annotation annotation : parameterAnnotations[i]) {
                 if (annotation instanceof Param) {
                     Param param = (Param) annotation;
-                    System.out.println("形参定义的" + i + " param ==" + JSON.toJSONString(parameterAnnotations[i]) + " 实际值" + args[i]);
 
                     map.put(param.value(), args[i]);
 
@@ -156,7 +150,6 @@ public class DQueryHandler {
         DynamicSql[] dynamicSqls = dQuery.dynamicSql();
         for (DynamicSql dynamicSql : dynamicSqls) {
             String isAddSql = dynamicSql.sql();
-            System.out.println("动态参数1" + isAddSql);
             if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgmentField())) {
                 continue;
             }
@@ -224,17 +217,12 @@ public class DQueryHandler {
                 parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
             } else {
                 Class<?> clazz = entry.getValue().getClass();
-                System.out.println("clazz name " + clazz.getName());
                 Field[] fields = clazz.getDeclaredFields();
                 if (fields != null && fields.length > 0) {
                     for (Field field : fields) {
-                        System.out.println("====" + field.getName());
                         String key = entry.getKey().concat(".").concat(field.getName());
                         field.setAccessible(true);
                         Object target = field.get(entry.getValue());
-                        System.out.println("key==" + key);
-                        System.out.println("target==" + JSON.toJSONString(target));
-                        System.out.println("entry.getValue()==" + JSON.toJSONString(entry.getValue()));
                         if (null == target || StringUtils.isBlank(target.toString())) {
                             continue;
                         }

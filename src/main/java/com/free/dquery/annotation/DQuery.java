@@ -17,7 +17,7 @@ public @interface DQuery {
     /**
      * SQL 的头部
      * <p>最终的sql =  SQL头 + 动态SQL + SQL尾</p>
-     * <p>这个SQL头能不能为""呢.我也想了很久,我觉得:不能,没有为啥,因为是我封装的</p>
+     * <p>这个SQL头能不能为""</p>
      *
      * @return
      */

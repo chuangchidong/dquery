@@ -4,9 +4,9 @@ package com.free.dquery.exception;
  * @author zhangzhidong
  * @date 2017/11/27
  */
-public class SQLQueryException extends RuntimeException {
+public class DQueryException extends RuntimeException {
 
-    public SQLQueryException(String message) {
+    public DQueryException(String message) {
         super(message);
     }
 }

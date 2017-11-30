@@ -8,9 +8,6 @@ public class QueryParam {
      private String key;
      private Object value;
 
-    public QueryParam() {
-    }
-
     public QueryParam(String key, Object value) {
         this.key = key;
         this.value = value;

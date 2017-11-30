@@ -1,6 +1,5 @@
 package com.free.dquery.handle;
 
-import com.alibaba.fastjson.JSON;
 import com.free.dquery.annotation.DQuery;
 import com.free.dquery.annotation.DynamicSql;
 import com.free.dquery.denum.DynamicSqlJudgmentType;
@@ -19,9 +18,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -32,9 +29,11 @@ public class DQueryHandler {
 
     // 访问session
     private SessionFactory sessionFactory;
-    // 访问session
+    // 动态查询
     private DQuery dQuery;
+    // 切点方法
     private Method method;
+    // 分页信息
     private PageInfo pageInfo;
 
     public DQueryHandler(SessionFactory sessionFactory) {
@@ -54,7 +53,7 @@ public class DQueryHandler {
         // 获取返回值类型
         Class<?> returnType = method.getReturnType();
         // 获取返回值中
-        Type genericReturnType = method.getGenericReturnType();
+//        Type genericReturnType = method.getGenericReturnType();
 
         // 获取SQL
         List queryParameters = this.queryParameters(methodParameters);
@@ -81,8 +80,8 @@ public class DQueryHandler {
         } else if (returnType == PageResult.class) {
             // 分页
             List list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
-            Long total = QueryUtil.queryCountSize(sql,queryParameters,sessionFactory);
-            return new PageResult(pageInfo.getPage(),pageInfo.getSize(),total,list);
+            Long total = QueryUtil.queryCountSize(sql, queryParameters, sessionFactory);
+            return new PageResult(pageInfo.getPage(), pageInfo.getSize(), total, list);
         } else {
             // 对象javabean
             return QueryUtil.queryForObject(sql, queryParameters, returnType, sessionFactory);
@@ -139,7 +138,8 @@ public class DQueryHandler {
 
     private String getSql(Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
         StringBuilder sb = new StringBuilder();
-        String sqlHead = dQuery.sqlHead().replace("select","SELECT").replace("from","FROM");;
+        String sqlHead = dQuery.sqlHead().replace("select", "SELECT").replace("from", "FROM");
+        ;
 
         if (StringUtils.isBlank(sqlHead)) {
             throw new DQueryException("哦豁,SQL头部为空,查毛线呢,(提示:神说,遇到新的注解,先看看注释)");
@@ -207,6 +207,13 @@ public class DQueryHandler {
         return check;
     }
 
+    /**
+     * 获取请求参数
+     *
+     * @param methodParameters
+     * @return
+     * @throws IllegalAccessException
+     */
     private List queryParameters(Map<String, Object> methodParameters) throws IllegalAccessException {
         List parameters = new ArrayList<>();
         for (Map.Entry<String, Object> entry : methodParameters.entrySet()) {
@@ -236,9 +243,7 @@ public class DQueryHandler {
             }
 
         }
-
         return parameters;
     }
-
 
 }

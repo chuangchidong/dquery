@@ -17,31 +17,6 @@ import java.util.Map;
  */
 public class MapUtil {
 
-
-    public static String mapToHttpRequestParam(Map<String, Object> map) {
-        if (map == null || map.size() == 0) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String key : map.keySet()) {
-            if (StringUtils.isEmpty(sb.toString())) {
-                sb.append(key + "=" + map.get(key).toString());
-            } else {
-                sb.append("&" + key + "=" + map.get(key).toString());
-            }
-        }
-
-        return sb.toString();
-    }
-
-    public static <T> List<T> mapToObject(List<Map> list, Class c) throws InstantiationException, IllegalAccessException {
-        List objectList = new ArrayList();
-        for (Map map : list) {
-            objectList.add(mapToObject(map, c));
-        }
-        return objectList;
-    }
-
     public static Object mapToObject(Map<String, Object> map, Class<?> beanClass) throws IllegalAccessException, InstantiationException {
         if (map == null)
             return null;
@@ -71,19 +46,4 @@ public class MapUtil {
         return obj;
     }
 
-
-    private static <T> void setValue(Field field, T t, Map map) throws IllegalAccessException {
-        if (map.get(field.getName()) == null) {
-            field.set(t, null);
-        }
-        AnnotatedType annotatedType = field.getAnnotatedType();
-
-        //Integet to Long   不能转换
-        if ("java.lang.Long".equals(annotatedType.getType().getTypeName())) {
-            field.set(t, Long.parseLong(map.get(field.getName()).toString()));
-            return;
-        }
-        field.set(t, map.get(field.getName()));
-    }
-    
 }

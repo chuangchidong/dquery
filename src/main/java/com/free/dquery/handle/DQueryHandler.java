@@ -150,10 +150,10 @@ public class DQueryHandler {
         DynamicSql[] dynamicSqls = dQuery.dynamicSql();
         for (DynamicSql dynamicSql : dynamicSqls) {
             String isAddSql = dynamicSql.sql();
-            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgmentField())) {
+            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgementField())) {
                 continue;
             }
-            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgmentField(), dynamicSql.type(), methodParameters, queryParameters);
+            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgementField(), dynamicSql.type(), methodParameters, queryParameters);
             if (checkAndPackDynamicSql) {
                 sb.append(isAddSql);
             }
@@ -168,23 +168,23 @@ public class DQueryHandler {
     /**
      * 检查并封装  动态sql
      *
-     * @param judgmentField    检查字段
+     * @param judgementField    检查字段
      * @param type             判断类型
      * @param methodParameters 所有参数
      * @param queryParameters  查询参数
      * @return
      */
-    private boolean checkAndPackDynamicSql(String judgmentField, DynamicSqlJudgmentType type, Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
+    private boolean checkAndPackDynamicSql(String judgementField, DynamicSqlJudgmentType type, Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
         boolean check = false;
         Object value = null;
         if (!CollectionUtils.isEmpty(queryParameters)) {
             for (Object object : queryParameters) {
                 if (object instanceof QueryParam) {
-                    if (((QueryParam) object).getKey().equals(judgmentField)) {
+                    if (((QueryParam) object).getKey().equals(judgementField)) {
                         value = ((QueryParam) object).getValue();
                     }
                 } else if (object instanceof QueryParamList) {
-                    if (((QueryParam) object).getKey().equals(judgmentField)) {
+                    if (((QueryParam) object).getKey().equals(judgementField)) {
                         value = ((QueryParam) object).getValue();
                     }
                 }

@@ -23,8 +23,8 @@ public interface ITestDao extends JpaRepository<Test, Long> {
 
     @DQuery(sqlHead = "select b.role_id roleId,c.name roleName,a.name resourceName from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId",
             dynamicSql = {
-                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgmentField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
-                    @DynamicSql(sql = " and a.name=:dto.roleName", judgmentField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
+                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgementField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
+                    @DynamicSql(sql = " and a.name=:dto.roleName", judgementField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
             }
     )
     RoleSource findInfoJoin(@Param("dto") RoleSourceDto dto);
@@ -35,8 +35,8 @@ public interface ITestDao extends JpaRepository<Test, Long> {
 
     @DQuery(sqlHead = "select b.role_id roleId from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId",
             dynamicSql = {
-                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgmentField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
-                    @DynamicSql(sql = " and a.name=:dto.roleName", judgmentField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
+                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgementField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
+                    @DynamicSql(sql = " and a.name=:dto.roleName", judgementField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
             })
     PageResult<RoleSource> findPage(@Param("dto") RoleSourceDto dto, @Param("page") PageInfo pageInfo);
 }

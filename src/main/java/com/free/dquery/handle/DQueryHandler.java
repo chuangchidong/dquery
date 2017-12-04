@@ -8,13 +8,13 @@ import com.free.dquery.queryparam.QueryParamList;
 import com.free.dquery.util.PageInfo;
 import com.free.dquery.util.PageResult;
 import com.free.dquery.util.QueryUtil;
-import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.hibernate.SessionFactory;
 import org.springframework.data.repository.query.Param;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.script.*;
 import java.lang.annotation.Annotation;
@@ -166,7 +166,7 @@ public class DQueryHandler {
         StringBuilder sb = new StringBuilder();
         String sqlHead = dQuery.sqlHead().replace("select", "SELECT").replace("from", "FROM");
 
-        if (StringUtils.isBlank(sqlHead)) {
+        if (!StringUtils.isEmpty(sqlHead)) {
             throw new DQueryException("哦豁,SQL头部为空,查毛线呢,(提示:神说,遇到新的注解,先看看注释)");
         }
         sb.append(sqlHead);
@@ -182,7 +182,7 @@ public class DQueryHandler {
         for (DynamicSql dynamicSql : dynamicSqls) {
             isAddSql = dynamicSql.sql();
             conditions = dynamicSql.conditions();
-            if (StringUtils.isNotBlank(isAddSql) && StringUtils.isNotBlank(conditions)) {
+            if (!StringUtils.isEmpty(isAddSql) && !StringUtils.isEmpty(conditions)) {
                 flag = (Boolean) engine.eval(conditions);
                 if (flag) {
                     sb.append(isAddSql);
@@ -219,7 +219,7 @@ public class DQueryHandler {
                         String key = entry.getKey().concat(".").concat(field.getName());
                         field.setAccessible(true);
                         Object target = field.get(entry.getValue());
-                        if (null == target || StringUtils.isBlank(target.toString())) {
+                        if (null == target || StringUtils.isEmpty(target.toString())) {
                             continue;
                         }
                         if (target.getClass().isArray() || Collection.class.isAssignableFrom(target.getClass())) {

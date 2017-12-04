@@ -1,14 +1,9 @@
 package com.free.dquery.util;
 
-import com.alibaba.fastjson.JSON;
-import org.springframework.util.StringUtils;
 
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**

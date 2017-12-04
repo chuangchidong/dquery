@@ -1,7 +1,5 @@
 package com.free.dquery.annotation;
 
-import com.free.dquery.denum.DynamicSqlJudgmentType;
-
 import java.lang.annotation.*;
 
 /**
@@ -21,37 +19,15 @@ public @interface DynamicSql {
     String sql() default "";
 
     /**
-     * 根据哪个字段判断此SQL是否需要
-     * <p>如果这里为"",SQL 默认不会拼接</p>
-     * <p>如果这里为#{obj.o} 则会取传入的obj参数的o属性,也就是mybatis写法,但是sql里面还是hibernate写法,:xxxx ,暂时不支持? 因为,我觉得,这是一种很不负责的写法</p>
-     * <li>sql = " and obj.xxx = :simple",judgementField="#{obj.simpl}"</li>
-     *
-     * @return
-     */
-    String judgementField() default "";
-
-
-    /**
      * 判断SQL是否要拼接的条件表达式语句 默认不拼接
      * <p>表达式: 取@Param 注解对象直接按照逻辑运算<p/>
      * <p>表达式为 true时拼接, false不拼接</p>
      * <li>如: dto.name != null && dto.name !=''</li>
      * <li>   dto.id != null && dto.name >=0 </li>
+     * <li>   list.length > 0 </li>
      * <p>注意: 数字类型 若提前不判断null的话,默认值为0</p>
      *
      * @return
      */
     String conditions() default "";
-
-    /**
-     * 当判断字段为啥时,要动态SQL
-     * <p>是要</p>
-     * <p>要!!!!!</p>
-     * <p>  要!!!</p>
-     * <p>    要!</p>
-     *
-     * @return
-     */
-    DynamicSqlJudgmentType type() default DynamicSqlJudgmentType.NOTNULL;
-
 }

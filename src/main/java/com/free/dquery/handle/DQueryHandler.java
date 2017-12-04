@@ -64,7 +64,7 @@ public class DQueryHandler {
         // 获取SQL
         List queryParameters = this.queryParameters(methodParameters);
 
-        String sql = getSql(methodParameters, queryParameters);
+        String sql = getSql();
 
         return query(queryParameters, sql, returnType);
 
@@ -142,40 +142,32 @@ public class DQueryHandler {
         return map;
     }
 
-    private String getSql(Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException, ScriptException {
+    private String getSql() throws NoSuchFieldException, IllegalAccessException, ScriptException {
         StringBuilder sb = new StringBuilder();
         String sqlHead = dQuery.sqlHead().replace("select", "SELECT").replace("from", "FROM");
-        ;
 
         if (StringUtils.isBlank(sqlHead)) {
             throw new DQueryException("哦豁,SQL头部为空,查毛线呢,(提示:神说,遇到新的注解,先看看注释)");
         }
         sb.append(sqlHead);
 
-
-        Boolean flag = false;
+        // 动态SQL语句
+        String isAddSql;
+        // 动态SQL是否添加逻辑表达式
+        String conditions;
+        //  判断逻辑表达式结果
+        Boolean flag;
         // 动态添加
         DynamicSql[] dynamicSqls = dQuery.dynamicSql();
         for (DynamicSql dynamicSql : dynamicSqls) {
-            String isAddSql = dynamicSql.sql();
-//            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgementField())) {
-//                continue;
-//            }
-//            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgementField(), dynamicSql.type(), methodParameters, queryParameters);
-
-//            if (checkAndPackDynamicSql) {
-//                sb.append(isAddSql);
-//            }
-
-            String conditions = dynamicSql.conditions();
+            isAddSql = dynamicSql.sql();
+            conditions = dynamicSql.conditions();
             if (StringUtils.isNotBlank(isAddSql) && StringUtils.isNotBlank(conditions)) {
                 flag = (Boolean) engine.eval(conditions);
                 if (flag) {
                     sb.append(isAddSql);
                 }
             }
-
-
         }
 
         //加上SQL 尾部
@@ -265,6 +257,11 @@ public class DQueryHandler {
         return parameters;
     }
 
+    /**
+     * 判断逻辑表达式对应字段的值
+     *
+     * @param methodParameters
+     */
     private void judgementValues(Map<String, Object> methodParameters) {
         ScriptEngineManager manager = new ScriptEngineManager();
         this.engine = manager.getEngineByName("JavaScript");

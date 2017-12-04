@@ -84,8 +84,14 @@ public class DQueryHandler {
             return QueryUtil.queryForList(sql, queryParameters, null, null, sessionFactory);
         } else if (returnType == PageResult.class) {
             // 分页
-            List list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
             Long total = QueryUtil.queryCountSize(sql, queryParameters, sessionFactory);
+            List list;
+            if (total != null && total.longValue() > 0) {
+                list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
+            } else {
+                list = new ArrayList<>();
+            }
+
             return new PageResult(pageInfo.getPage(), pageInfo.getSize(), total, list);
         } else {
             // 对象javabean

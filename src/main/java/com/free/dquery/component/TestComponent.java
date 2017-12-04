@@ -26,8 +26,8 @@ public class TestComponent implements CommandLineRunner {
     public void run(String... strings) throws Exception {
         RoleSourceDto dto = new RoleSourceDto();
         dto.setRoleId(1);
-        dto.setResourceName("系统管理1");
-//        dto.setRoleName("系统管理");
+//        dto.setResourceName("系统管理1");
+        dto.setRoleName("系统管理");
 
 
         PageInfo pageInfo = new PageInfo();

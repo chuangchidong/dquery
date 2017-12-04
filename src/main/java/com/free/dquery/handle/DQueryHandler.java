@@ -17,6 +17,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.data.repository.query.Param;
 import org.springframework.util.CollectionUtils;
 
+import javax.script.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -36,6 +37,8 @@ public class DQueryHandler {
     // 分页信息
     private PageInfo pageInfo;
 
+    private ScriptEngine engine;
+
     public DQueryHandler(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
@@ -49,6 +52,9 @@ public class DQueryHandler {
 
         // 获取参数
         Map<String, Object> methodParameters = this.getMethodParameters(pjp.getArgs());
+
+        // 判断语句键值
+        this.judgementValues(methodParameters);
 
         // 获取返回值类型
         Class<?> returnType = method.getReturnType();
@@ -136,7 +142,7 @@ public class DQueryHandler {
         return map;
     }
 
-    private String getSql(Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException {
+    private String getSql(Map methodParameters, List queryParameters) throws NoSuchFieldException, IllegalAccessException, ScriptException {
         StringBuilder sb = new StringBuilder();
         String sqlHead = dQuery.sqlHead().replace("select", "SELECT").replace("from", "FROM");
         ;
@@ -146,17 +152,30 @@ public class DQueryHandler {
         }
         sb.append(sqlHead);
 
+
+        Boolean flag = false;
         // 动态添加
         DynamicSql[] dynamicSqls = dQuery.dynamicSql();
         for (DynamicSql dynamicSql : dynamicSqls) {
             String isAddSql = dynamicSql.sql();
-            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgementField())) {
-                continue;
+//            if (StringUtils.isBlank(isAddSql) || StringUtils.isBlank(dynamicSql.judgementField())) {
+//                continue;
+//            }
+//            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgementField(), dynamicSql.type(), methodParameters, queryParameters);
+
+//            if (checkAndPackDynamicSql) {
+//                sb.append(isAddSql);
+//            }
+
+            String conditions = dynamicSql.conditions();
+            if (StringUtils.isNotBlank(isAddSql) && StringUtils.isNotBlank(conditions)) {
+                flag = (Boolean) engine.eval(conditions);
+                if (flag) {
+                    sb.append(isAddSql);
+                }
             }
-            boolean checkAndPackDynamicSql = checkAndPackDynamicSql(dynamicSql.judgementField(), dynamicSql.type(), methodParameters, queryParameters);
-            if (checkAndPackDynamicSql) {
-                sb.append(isAddSql);
-            }
+
+
         }
 
         //加上SQL 尾部
@@ -168,7 +187,7 @@ public class DQueryHandler {
     /**
      * 检查并封装  动态sql
      *
-     * @param judgementField    检查字段
+     * @param judgementField   检查字段
      * @param type             判断类型
      * @param methodParameters 所有参数
      * @param queryParameters  查询参数
@@ -246,4 +265,14 @@ public class DQueryHandler {
         return parameters;
     }
 
+    private void judgementValues(Map<String, Object> methodParameters) {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        this.engine = manager.getEngineByName("JavaScript");
+
+        if (!CollectionUtils.isEmpty(methodParameters)) {
+            for (Map.Entry<String, Object> entry : methodParameters.entrySet()) {
+                engine.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
 }

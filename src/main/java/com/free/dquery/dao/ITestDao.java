@@ -2,6 +2,7 @@ package com.free.dquery.dao;
 
 import com.free.dquery.annotation.DQuery;
 import com.free.dquery.annotation.DynamicSql;
+import com.free.dquery.entity.RoleResourceEntity;
 import com.free.dquery.entity.RoleSource;
 import com.free.dquery.entity.RoleSourceDto;
 import com.free.dquery.entity.Test;
@@ -37,10 +38,18 @@ public interface ITestDao extends JpaRepository<Test, Long> {
 //                    @DynamicSql(sql = " and a.name=:dto.resourceName", judgementField = "dto.resourceName", type = DynamicSqlJudgmentType.NOTEMPTY),
 //                    @DynamicSql(sql = " and a.name=:dto.roleName", judgementField = "dto.roleName", type = DynamicSqlJudgmentType.NOTEMPTY)
 //            })
-    @DQuery(sqlHead = "select b.role_id roleId from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId",
+    @DQuery(sqlHead = "select b.role_id roleId, a.name resourceName from sys_resource a left join sys_role_resource b on a.id=b.resource_id left join sys_role c on b.role_id=c.id where 1=1 and c.id=:dto.roleId",
             dynamicSql = {
                     @DynamicSql(sql = " and a.name=:dto.resourceName", conditions = "dto.resourceName != null && dto.resourceName !='' "),
-                    @DynamicSql(sql = " and a.name=:dto.roleName", conditions = "dto.roleName !=null && dto.roleName != '' ")
+                    @DynamicSql(sql = " and b.name=:dto.roleName", conditions = "dto.roleName !=null && dto.roleName != '' ")
             })
     PageResult<RoleSource> findPage(@Param("dto") RoleSourceDto dto, @Param("page") PageInfo pageInfo);
+
+
+    @DQuery(sqlHead = "select id,role_id,resource_id from sys_role_resource where 1=1 ",
+        dynamicSql = {
+                @DynamicSql(sql = " and role_id = :entity.roleId", conditions = "entity.roleId > 0" )
+        }
+    )
+    PageResult<RoleResourceEntity> findRolePage(@Param("entity") RoleResourceEntity entity,@Param("page") PageInfo pageInfo);
 }

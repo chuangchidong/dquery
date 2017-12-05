@@ -65,29 +65,45 @@ public class DQueryHandler {
 
         String sql = getSql();
 
-        return query(queryParameters, sql, returnType);
+        return query(queryParameters, sql, method);
 
     }
 
     /**
      * @param queryParameters
      * @param sql
-     * @param returnType
+     * @param method
      * @return
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    private Object query(List queryParameters, String sql, Class<?> returnType) throws InstantiationException, IllegalAccessException {
+    private Object query(List queryParameters, String sql, Method method) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        Type[] types = null;
+
+        //获取返回值类型
+        Class<?> returnType = method.getReturnType();
+        // 获取指定方法的返回值泛型信息
+        Type genericReturnType = method.getGenericReturnType();
+
+        if (genericReturnType instanceof ParameterizedType) {// 判断获取的类型是否是参数类型
+            types = ((ParameterizedType) genericReturnType).getActualTypeArguments();// 强制转型为带参数的泛型类型，
+        }
 
         if (returnType.isArray() || Collection.class.isAssignableFrom(returnType)) {
+            if (types!=null && types.length>0 ){
+                returnType = Class.forName(types[0].getTypeName());
+            }
             // 列表
-            return QueryUtil.queryForList(sql, queryParameters, null, null, sessionFactory);
+            return QueryUtil.queryForList(sql, queryParameters, null, null, returnType, sessionFactory);
         } else if (returnType == PageResult.class) {
             // 分页
             Long total = QueryUtil.queryCountSize(sql, queryParameters, sessionFactory);
             List list;
             if (total != null && total.longValue() > 0) {
-                list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), sessionFactory);
+                if (types!=null && types.length>0 ){
+                    returnType = Class.forName(types[0].getTypeName());
+                }
+                list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), returnType, sessionFactory);
             } else {
                 list = new ArrayList<>();
             }
@@ -97,7 +113,6 @@ public class DQueryHandler {
             // 对象javabean
             return QueryUtil.queryForObject(sql, queryParameters, returnType, sessionFactory);
         }
-
 
     }
 

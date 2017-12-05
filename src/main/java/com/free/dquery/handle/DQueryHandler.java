@@ -166,7 +166,7 @@ public class DQueryHandler {
         StringBuilder sb = new StringBuilder();
         String sqlHead = dQuery.sqlHead().replace("select", "SELECT").replace("from", "FROM");
 
-        if (!StringUtils.isEmpty(sqlHead)) {
+        if (StringUtils.isEmpty(sqlHead)) {
             throw new DQueryException("哦豁,SQL头部为空,查毛线呢,(提示:神说,遇到新的注解,先看看注释)");
         }
         sb.append(sqlHead);

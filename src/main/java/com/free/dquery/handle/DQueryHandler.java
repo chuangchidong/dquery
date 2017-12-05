@@ -55,11 +55,6 @@ public class DQueryHandler {
         // 逻辑表达式对应的字段值
         this.judgementValues(methodParameters);
 
-        // 获取返回值类型
-        Class<?> returnType = method.getReturnType();
-        // 获取返回值中
-//        Type genericReturnType = method.getGenericReturnType();
-
         // 获取SQL
         List queryParameters = this.queryParameters(methodParameters);
 

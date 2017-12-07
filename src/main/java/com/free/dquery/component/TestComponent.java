@@ -3,8 +3,6 @@ package com.free.dquery.component;
 import com.alibaba.fastjson.JSON;
 import com.free.dquery.dao.ITestDao;
 import com.free.dquery.entity.RoleResourceEntity;
-import com.free.dquery.entity.RoleSource;
-import com.free.dquery.entity.RoleSourceDto;
 import com.free.dquery.util.PageInfo;
 import com.free.dquery.util.PageResult;
 import org.springframework.boot.CommandLineRunner;
@@ -55,8 +53,6 @@ public class TestComponent implements CommandLineRunner {
 
         PageResult<RoleResourceEntity> pageResult = testDao.findRolePage(entity,pageInfo);
         System.out.println("结果==="+ JSON.toJSONString(pageResult));
-
-
 
     }
 }

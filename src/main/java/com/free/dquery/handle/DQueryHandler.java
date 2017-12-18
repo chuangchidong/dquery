@@ -51,13 +51,12 @@ public class DQueryHandler {
 
         // 获取参数
         Map<String, Object> methodParameters = this.getMethodParameters(pjp.getArgs());
-
         // 逻辑表达式对应的字段值
         this.judgementValues(methodParameters);
 
-        // 获取SQL
         List queryParameters = this.queryParameters(methodParameters);
 
+        // 获取SQL
         String sql = getSql();
 
         return query(queryParameters, sql, method);
@@ -85,7 +84,7 @@ public class DQueryHandler {
         }
 
         if (returnType.isArray() || Collection.class.isAssignableFrom(returnType)) {
-            if (types!=null && types.length>0 ){
+            if (types != null && types.length > 0) {
                 returnType = Class.forName(types[0].getTypeName());
             }
             // 列表
@@ -95,7 +94,7 @@ public class DQueryHandler {
             Long total = QueryUtil.queryCountSize(sql, queryParameters, sessionFactory);
             List list;
             if (total != null && total.longValue() > 0) {
-                if (types!=null && types.length>0 ){
+                if (types != null && types.length > 0) {
                     returnType = Class.forName(types[0].getTypeName());
                 }
                 list = QueryUtil.queryForList(sql, queryParameters, pageInfo.getPage(), pageInfo.getSize(), returnType, sessionFactory);
@@ -217,10 +216,15 @@ public class DQueryHandler {
         List parameters = new ArrayList<>();
         for (Map.Entry<String, Object> entry : methodParameters.entrySet()) {
 
-            if (entry.getValue() instanceof Number) {
+
+            if (entry.getValue() == null) {
+                parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
+            } else if (entry.getValue() instanceof Number) {
                 parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
             } else if (entry.getValue() instanceof String) {
                 parameters.add(new QueryParam(entry.getKey(), entry.getValue()));
+            } else if (entry.getValue() instanceof List) {
+                parameters.add(new QueryParamList(entry.getKey(), ((List) entry.getValue()).toArray()));
             } else {
                 Class<?> clazz = entry.getValue().getClass();
                 Field[] fields = clazz.getDeclaredFields();
@@ -233,7 +237,7 @@ public class DQueryHandler {
                             continue;
                         }
                         if (target.getClass().isArray() || Collection.class.isAssignableFrom(target.getClass())) {
-                            parameters.add(new QueryParamList(key, ((List) target).toArray()));
+                            parameters.add(new QueryParamList(key, (Object[]) target));
                         } else {
                             parameters.add(new QueryParam(key, target));
                         }

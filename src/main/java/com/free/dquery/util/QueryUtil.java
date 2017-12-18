@@ -11,11 +11,14 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author zhangzhidong
@@ -94,17 +97,27 @@ public class QueryUtil {
         QueryParam queryParam;
         QueryParamList queryParamList;
         SQLQuery sqlQuery = session.createSQLQuery(sql);
+
+        // 待赋值的字段
+        List<String> sqlArr = new ArrayList<>();
+        String regEx = ":[a-z]([\\w.?]+)*";
+        Pattern pattern = Pattern.compile(regEx);
+        Matcher mat = pattern.matcher(sql);
+        while (mat.find()) {
+            sqlArr.add(mat.group());
+        }
+
         //封装查询条件
         for (Object o : param) {
             if (o instanceof QueryParam) {
                 queryParam = (QueryParam) o;
-                if (sql.contains(queryParam.getKey())) {
+                if (sqlArr.contains(":" + queryParam.getKey())) {
                     sqlQuery.setParameter(queryParam.getKey(), queryParam.getValue());
                 }
             }
             if (o instanceof QueryParamList) {
                 queryParamList = (QueryParamList) o;
-                if (sql.contains(queryParamList.getKey())) {
+                if (sqlArr.contains(":" + queryParamList.getKey())) {
                     sqlQuery.setParameterList(queryParamList.getKey(), queryParamList.getValue());
                 }
             }
@@ -201,11 +214,15 @@ public class QueryUtil {
                 continue;
             }
             field.setAccessible(true);
-            if (map.get(field.getName()) instanceof BigInteger) {
+            if (map.get(field.getName()) instanceof BigInteger || map.get(field.getName()) instanceof BigDecimal) {
                 if (field.getType() == Integer.class) {
                     field.set(obj, Integer.parseInt(map.get(field.getName()).toString()));
                 } else if (field.getType() == Long.class) {
                     field.set(obj, Long.parseLong(map.get(field.getName()).toString()));
+                } else if (field.getType() == Double.class) {
+                    field.set(obj, Double.parseDouble(map.get(field.getName()).toString()));
+                } else if (field.getType() == Float.class) {
+                    field.set(obj, Float.parseFloat(map.get(field.getName()).toString()));
                 } else {
                     field.set(obj, map.get(field.getName()));
                 }

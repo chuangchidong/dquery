@@ -4,14 +4,26 @@
 * 2.实现查询的参数动态变化
 * 3.实现分页查询
 
-
+  
 * TestComponent.java 为使用案例
+```java
+ @DQuery(sqlHead = "select sum(a.payment_amount) total_amount,sum(refund_amount) refundTotalAmount, count(1) num,a.source,sum(a.profit) totalProfit, a.is_refund isRefund from t_order a where a.status=3",
+            dynamicSql = {
+                    @DynamicSql(sql = " and a.store_id in (:storeIds)", conditions = "storeIds !=null && storeIds != '' "),
+                    @DynamicSql(sql = " and a.creation_time > :startTime ", conditions = "startTime !=null && startTime > 0 "),
+                    @DynamicSql(sql = " and a.creation_time < :endTime ", conditions = "endTime !=null && endTime > 0 "),
+                    @DynamicSql(sql = " and a.store_id = :storeId ", conditions = "storeId !=null && storeId > 0 ")
+            },
+            sqlTail = " group by a.source, a.is_refund")
+    List<SaleStatisticsBaseDto> findSaleStatistics(@Param("storeIds") List<Long> storeIds, @Param("storeId") Long storeId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+```
+#####
+  DQuery 注解标识
+  dynamicSql：扩展查询条件
+  @DynamicSql sql为追加的查询条件，conditions为判断语句，为true则追加，false不追加
+  返回值结果为普通的javabean对象，但是要保证与SQL中的字段名称一致
 
-
-
-##### 后期完善
-* 判断方式包含 等于,大于,小于等
-* 判断条件为指定值,数字,字符串
-* 可以同时判断多个条件, 支持且,或逻辑判断
+##### 对应的springboot starter包
+https://github.com/chuangchidong/dquery-spring-boot-starter.git
 
 

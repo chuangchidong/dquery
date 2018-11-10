@@ -53,7 +53,11 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.32</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.free.dquery</groupId>
+			<artifactId>dquery-spring-boot-starter</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

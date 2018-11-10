@@ -23,7 +23,16 @@
   @DynamicSql sql为追加的查询条件，conditions为判断语句，为true则追加，false不追加
   返回值结果为普通的javabean对象，但是要保证与SQL中的字段名称一致
 
-##### 对应的springboot starter包
+##### 对应的springboot starter包源码
 https://github.com/chuangchidong/dquery-spring-boot-starter.git
+
+项目下载编译，在自己的应用程序pom中加入引用，你懂得😉
+```xml
+     <dependency>
+        <groupId>com.free.dquery</groupId>
+      	<artifactId>dquery-spring-boot-starter</artifactId>
+      	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
+```
 
 
